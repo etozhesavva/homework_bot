@@ -42,6 +42,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
+    """Отправка сообщения в телеграмм."""
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
     except Exception as error:
@@ -49,6 +50,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
+    """Отправляеет запрос к API домашки на эндпоинт."""
     url = ENDPOINT
     try:
         date = {'from_date': current_timestamp}
@@ -74,7 +76,9 @@ def get_api_answer(current_timestamp):
         ))
     return response_json
 
+
 def check_response(response):
+    """Проверять полученный ответ на корректность."""
     if not isinstance(response, dict):
             raise TypeError
     if 'homeworks' in response:
@@ -88,10 +92,12 @@ def check_response(response):
 
 
 def parse_status(homework):
+    """Проверка изменения статуса."""
     return STATUS_CHANGE.format(
         homework_name=homework['homework_name'],
         verdict=HOMEWORK_STATUSES[homework['status']]
     )
+
 
 def check_tokens():
     """Проверка наличия необходимых переменных окружения."""
@@ -103,6 +109,7 @@ def check_tokens():
         return True
     logging.critical('Отсутствуют обязательные переменные окружения.')
     return False
+
 
 def main():
     """Основная логика работы бота."""
