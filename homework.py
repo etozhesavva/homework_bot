@@ -80,7 +80,7 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверять полученный ответ на корректность."""
     if not isinstance(response, dict):
-            raise TypeError
+        raise TypeError
     if 'homeworks' in response:
         if isinstance(response['homeworks'], list):
             if not response['homeworks']:
