@@ -1,0 +1,2 @@
+class ResponseDataError(Exception):
+    pass
