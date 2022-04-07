@@ -104,8 +104,8 @@ def parse_status(homework):
         message_homework_name = "Такого имени не существует"
         raise KeyError(message_homework_name)
     return STATUS_CHANGE.format(
-        homework_name = homework['homework_name'],
-        verdict = HOMEWORK_VERDICTS[homework['status']]
+        homework_name=homework['homework_name'],
+        verdict=HOMEWORK_VERDICTS[homework['status']]
     )
 
 
