@@ -79,46 +79,72 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверять полученный ответ на корректность."""
+    homework = response['homeworks'][0]
     if not isinstance(response, dict):
         raise TypeError('API вернул неожиданный тип данных')
     if 'homeworks' in response:
         if isinstance(response['homeworks'], list):
             return response['homeworks']
     raise exceptions.ResponseDataError(
-        'Отсутствуют ожидаемые ключи в ответе API.'
+        INVALID_STATUS.format(status=homework['status'])
     )
 
 
 def parse_status(homework):
     """Проверка изменения статуса."""
+    homework_name=homework['homework_name'],
+    homework_status=homework['status']
+    verdict=HOMEWORK_VERDICTS[homework['status']]
+    if not verdict:
+        message_verdict = "Такого статуса нет в словаре"
+        raise KeyError(message_verdict)
+    if homework_status not in HOMEWORK_VERDICTS:
+        message_homework_status = "Такого статуса не существует"
+        raise KeyError(message_homework_status)
+    if "homework_name" not in homework:
+        message_homework_name = "Такого имени не существует"
+        raise KeyError(message_homework_name)
     return STATUS_CHANGE.format(
-        homework_name=homework['homework_name'],
-        verdict=HOMEWORK_VERDICTS[homework['status']]
+        homework_name,
+        verdict
     )
 
 
 def check_tokens():
     """Проверка наличия необходимых переменных окружения."""
-    if (
-        PRACTICUM_TOKEN
-        and TELEGRAM_TOKEN
-        and TELEGRAM_CHAT_ID
-    ):
-        return True
-    logging.critical('Отсутствуют обязательные переменные окружения.')
-    return False
+    is_critical = True
+    if not PRACTICUM_TOKEN:
+        is_critical = False
+        logging.critical(
+            'Отсутствует обязательная переменная окружения PRACTICUM_TOKEN')
+    elif not TELEGRAM_TOKEN:
+        is_critical = False
+        logging.critical(
+            'Отсутствует обязательная переменная окружения TELEGRAM_TOKEN')
+    elif not TELEGRAM_CHAT_ID:
+        is_critical = False
+        logging.critical(
+            'Отсутствует обязательная переменная окружения TELEGRAM_CHAT_ID')
+    return is_critical
 
 
 def main():
     """Основная логика работы бота."""
+    if not check_tokens():
+        exit()
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time()) - RETRY_TIME
     while True:
         try:
             response = get_api_answer(current_timestamp)
             homework = check_response(response)
-            message = parse_status(homework)
-            send_message(bot, message)
+            if homework:
+                status_message = parse_status(homework)
+                send_message(bot, status_message)
+            else:
+                logging.debug(
+                    "Статус задания не изменился с последней проверки"
+                )
             current_timestamp = response.get('current_date', current_timestamp)
         except Exception as error:
             message = GLITCH.format(error)
