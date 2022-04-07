@@ -34,7 +34,7 @@ NO_ANSWER = (
     'Не удалось получить ответ от сервера:\n{error}\n'
     '{url}\n{headers}\n{params}'
 )
-HOMEWORK_STATUSES = {
+HOMEWORK_VERDICTS = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
     'reviewing': 'Работа взята на проверку ревьюером.',
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
@@ -42,19 +42,19 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
-    """Отправка сообщения в телеграмм."""
+    """Высылает в чат измененный статус работы или сообщает об ошибке."""
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
     except Exception as error:
-        logging.error(NOT_SEND_MESSAGE.format(error=error), exc_info=True)
+        logging.exception(NOT_SEND_MESSAGE.format(error=error))
 
 
 def get_api_answer(current_timestamp):
     """Отправляеет запрос к API домашки на эндпоинт."""
     url = ENDPOINT
+    date = {'from_date': current_timestamp}
+    request_parametrs = dict(url=url, headers=HEADERS, params=date)
     try:
-        date = {'from_date': current_timestamp}
-        request_parametrs = dict(url=url, headers=HEADERS, params=date)
         response = requests.get(**request_parametrs)
     except requests.exceptions.RequestException as error:
         raise ConnectionError(NO_ANSWER.format(
@@ -80,11 +80,9 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверять полученный ответ на корректность."""
     if not isinstance(response, dict):
-        raise TypeError
+        raise TypeError('API вернул неожиданный тип данных')
     if 'homeworks' in response:
         if isinstance(response['homeworks'], list):
-            if not response['homeworks']:
-                logging.debug('В ответе нет новых статусов.')
             return response['homeworks']
     raise exceptions.ResponseDataError(
         'Отсутствуют ожидаемые ключи в ответе API.'
@@ -95,7 +93,7 @@ def parse_status(homework):
     """Проверка изменения статуса."""
     return STATUS_CHANGE.format(
         homework_name=homework['homework_name'],
-        verdict=HOMEWORK_STATUSES[homework['status']]
+        verdict=HOMEWORK_VERDICTS[homework['status']]
     )
 
 
