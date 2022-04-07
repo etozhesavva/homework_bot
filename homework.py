@@ -92,9 +92,9 @@ def check_response(response):
 
 def parse_status(homework):
     """Проверка изменения статуса."""
-    homework_name=homework['homework_name'],
-    homework_status=homework['status']
-    verdict=HOMEWORK_VERDICTS[homework['status']]
+    homework_name = homework['homework_name'],
+    homework_status = homework['status']
+    verdict = HOMEWORK_VERDICTS[homework['status']]
     if not verdict:
         message_verdict = "Такого статуса нет в словаре"
         raise KeyError(message_verdict)
