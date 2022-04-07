@@ -92,7 +92,6 @@ def check_response(response):
 
 def parse_status(homework):
     """Проверка изменения статуса."""
-    homework_name = homework['homework_name'],
     homework_status = homework['status']
     verdict = HOMEWORK_VERDICTS[homework['status']]
     if not verdict:
@@ -105,8 +104,8 @@ def parse_status(homework):
         message_homework_name = "Такого имени не существует"
         raise KeyError(message_homework_name)
     return STATUS_CHANGE.format(
-        homework_name,
-        verdict
+        homework_name = homework['homework_name'],
+        verdict = HOMEWORK_VERDICTS[homework['status']]
     )
 
 
