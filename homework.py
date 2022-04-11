@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 import requests
 import telegram
 
-import exceptions
-
 load_dotenv()
 
 
@@ -24,7 +22,7 @@ STATUS_NOT_CHANGED = 'Статус задания не изменился с п�
 STATUS_CHANGE = 'Изменился статус проверки работы "{homework_name}". {verdict}'
 GLITCH = 'Сбой в работе программы: {error}'
 TOKENS = ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID')
-INVALID_TOKEN ='Отсутствует обязательная переменная окружения {name}'
+INVALID_TOKEN = 'Отсутствует обязательная переменная окружения {name}'
 INVALID_CODE = (
     'Ошибка запроса - {code}\n',
     'Информация:\n{url}\n{headers}\n{params}'
@@ -49,7 +47,9 @@ def send_message(bot, message):
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
     except Exception as error:
-        logging.exception(NOT_SEND_MESSAGE.format(message=message, error=error))
+        logging.exception(NOT_SEND_MESSAGE.format(
+            message=message, error=error
+        ))
 
 
 def get_api_answer(current_timestamp):
