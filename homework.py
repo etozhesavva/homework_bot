@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-from turtle import right
 
 from dotenv import load_dotenv
 import requests
@@ -22,6 +21,9 @@ INVALID_STATUS = 'Неожиданный статус д/з {status}'
 STATUS_NOT_CHANGED = 'Статус задания не изменился с последней проверки'
 STATUS_CHANGE = 'Изменился статус проверки работы "{homework_name}". {verdict}'
 GLITCH = 'Сбой в работе программы: {error}'
+TYPE_NOT_DICT = 'API вернул неожиданный тип данных (Не dict)'
+TYPE_NOT_LIST = 'API вернул неожиданный тип данных (Не list)'
+HOMEWORK_KEY_MISSING = 'Ключ homeworks отсутствует в ответе'
 TOKENS = ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID')
 INVALID_TOKEN = 'Отсутствует обязательная переменная окружения {name}'
 WRONG_TOKEN = 'Неверный токен'
@@ -85,11 +87,11 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверять полученный ответ на корректность."""
     if not isinstance(response, dict):
-        raise TypeError('API вернул неожиданный тип данных (Не dict)')
+        raise TypeError(TYPE_NOT_DICT)
     if 'homeworks' not in response:
-        raise KeyError('Ключ homeworks отсутствует в ответе')
+        raise KeyError(HOMEWORK_KEY_MISSING)
     if not isinstance(response['homeworks'], list):
-        raise TypeError('API вернул неожиданный тип данных (Не list)')
+        raise TypeError(TYPE_NOT_LIST)
     return response['homeworks']
 
 
