@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from turtle import right
 
 from dotenv import load_dotenv
 import requests
@@ -23,6 +24,7 @@ STATUS_CHANGE = 'Изменился статус проверки работы "
 GLITCH = 'Сбой в работе программы: {error}'
 TOKENS = ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID')
 INVALID_TOKEN = 'Отсутствует обязательная переменная окружения {name}'
+WRONG_TOKEN = 'Неверный токен'
 INVALID_CODE = (
     'Ошибка запроса - {code}\n',
     'Информация:\n{url}\n{headers}\n{params}'
@@ -83,11 +85,11 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверять полученный ответ на корректность."""
     if not isinstance(response, dict):
-        raise TypeError('API вернул неожиданный тип данных')
+        raise TypeError('API вернул неожиданный тип данных (Не dict)')
     if 'homeworks' not in response:
         raise KeyError('Ключ homeworks отсутствует в ответе')
     if not isinstance(response['homeworks'], list):
-        raise TypeError('API вернул неожиданный тип данных')
+        raise TypeError('API вернул неожиданный тип данных (Не list)')
     return response['homeworks']
 
 
@@ -104,17 +106,18 @@ def parse_status(homework):
 
 def check_tokens():
     """Проверка наличия необходимых переменных окружения."""
+    right_token = True
     for name in TOKENS:
         if not globals()[name]:
             logging.error(INVALID_TOKEN.format(name=name))
-            return False
-    return True
+            right_token = False
+    return right_token
 
 
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
-        raise KeyError('Неверный токен')
+        raise KeyError(WRONG_TOKEN)
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time()) - RETRY_TIME
     while True:
